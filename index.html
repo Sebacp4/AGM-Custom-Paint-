@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="es"><head><script id="aura-preview-performance-controller">
+(function() {
+if (window.__auraPreviewPerformanceController) return;
+const nativeRequestAnimationFrame = window.requestAnimationFrame
+? window.requestAnimationFrame.bind(window)
+: function(callback) { return window.setTimeout(function() { callback(Date.now()); }, 16); };
+const nativeCancelAnimationFrame = window.cancelAnimationFrame
+? window.cancelAnimationFrame.bind(window)
+: window.clearTimeout.bind(window);
+const nativeSetInterval = window.setInterval.bind(window);
+let paused = false;
+let nextFrameId = 1;
+const frameRecords = new Map();
+const pausedFrameCallbacks = new Map();
+const style = document.createElement('style');
+style.id = 'aura-preview-performance-style';
+style.textContent = [
+'html[data-aura-preview-paused="true"] *,',
+'html[data-aura-preview-paused="true"] *::before,',
+'html[data-aura-preview-paused="true"] *::after {',
+'  animation-play-state: paused !important;',
+'  transition-duration: 0s !important;',
+'  scroll-behavior: auto !important;',
+'}'
+].join('\n');
+document.head.appendChild(style);
+window.requestAnimationFrame = function(callback) {
+const frameId = nextFrameId++;
+if (paused) {
+pausedFrameCallbacks.set(frameId, callback);
+frameRecords.set(frameId, { paused: true });
+return frameId;
+}
+const nativeFrameId = nativeRequestAnimationFrame(function(timestamp) {
+frameRecords.delete(frameId);
+callback(timestamp);
+});
+frameRecords.set(frameId, { nativeFrameId: nativeFrameId });
+return frameId;
+};
+window.cancelAnimationFrame = function(frameId) {
+const record = frameRecords.get(frameId);
+pausedFrameCallbacks.delete(frameId);
+if (record && typeof record.nativeFrameId !== 'undefined') {
+nativeCancelAnimationFrame(record.nativeFrameId);
+}
+frameRecords.delete(frameId);
+};
+window.setInterval = function(callback, delay) {
+const args = Array.prototype.slice.call(arguments, 2);
+return nativeSetInterval(function() {
+if (paused) return;
+callback.apply(this, args);
+}, delay);
+};
+const flushPausedFrames = function() {
+const callbacks = Array.from(pausedFrameCallbacks.entries());
+pausedFrameCallbacks.clear();
+callbacks.forEach(function(entry) {
+const frameId = entry[0];
+const callback = entry[1];
+const nativeFrameId = nativeRequestAnimationFrame(function(timestamp) {
+frameRecords.delete(frameId);
+callback(timestamp);
+});
+frameRecords.set(frameId, { nativeFrameId: nativeFrameId });
+});
+};
+const setPaused = function(nextPaused) {
+const shouldPause = Boolean(nextPaused);
+if (paused === shouldPause) return;
+paused = shouldPause;
+document.documentElement.toggleAttribute('data-aura-preview-paused', paused);
+if (!paused) {
+flushPausedFrames();
+}
+};
+window.__auraPreviewPerformanceController = {
+setPaused: setPaused,
+get paused() {
+return paused;
+}
+};
+window.addEventListener('message', function(event) {
+if (event.source !== window.parent) return;
+if (!event.data || event.data.type !== 'aura-preview-performance-mode') return;
+setPaused(event.data.paused);
+});
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+AGM Custom Paint's | Hojalatería y Pintura Automotriz en Puerto Rico
+</title>
+<meta name="description" content="AGM Custom Paint’s es un taller especializado en hojalatería, pintura automotriz, reparación de choques, pulidos, restauraciones y pintura de aros en Río Grande, Puerto Rico.">
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&amp;family=Montserrat:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- GSAP & ScrollTrigger -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<!-- Lenis Smooth Scroll -->
+<script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.27/bundled/lenis.min.js"></script>
+<!-- Iconify -->
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<style>
+/* Base hiding for GSAP reveals to prevent flash of unstyled content */
+.gsap-reveal, .gsap-fade-up { visibility: hidden; }
+/* Custom scrollbar for webkit to match the dark theme */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #0D0D0D; }
+::-webkit-scrollbar-thumb { background: #2A2E34; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #B0B0B0; }
+/* Lenis smooth scroll fix */
+html.lenis { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+</style>
+<!-- aura-ga4-start -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-2M6V79H761"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-2M6V79H761');
+</script>
+<!-- aura-ga4-end -->
+<style>
+.reveal-label, .reveal-heading, .reveal-link, .reveal-card { opacity: 1; transform: none; }
+.js-enabled .reveal-label, .js-enabled .reveal-heading, .js-enabled .reveal-link, .js-enabled .reveal-card { opacity: 0; }
+.js-enabled .reveal-heading { transform: translateY(18px); }
+.js-enabled .reveal-link { transform: translateX(20px); }
+.js-enabled .reveal-card { transform: translateY(24px); }
+@media (max-width: 768px) { .js-enabled .reveal-card { transform: translateY(14px); } }
+.reveal-active .reveal-label { opacity: 1; transition: opacity 450ms cubic-bezier(0.22, 1, 0.36, 1); }
+.reveal-active .reveal-heading { opacity: 1; transform: translateY(0); transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1) 100ms, transform 600ms cubic-bezier(0.22, 1, 0.36, 1) 100ms; }
+.reveal-active .reveal-link { opacity: 1; transform: translateX(0); transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1) 200ms, transform 500ms cubic-bezier(0.22, 1, 0.36, 1) 200ms; }
+.reveal-active .reveal-card { opacity: 1; transform: translateY(0); transition: opacity 550ms cubic-bezier(0.22, 1, 0.36, 1), transform 550ms cubic-bezier(0.22, 1, 0.36, 1); }
+.reveal-active .reveal-card:nth-child(1) { transition-delay: 0ms; }
+.reveal-active .reveal-card:nth-child(2) { transition-delay: 80ms; }
+.reveal-active .reveal-card:nth-child(3) { transition-delay: 160ms; }
+.reveal-active .reveal-card:nth-child(4) { transition-delay: 240ms; }
+@media (max-width: 768px) { .reveal-active .reveal-card:nth-child(1) { transition-delay: 0ms; } .reveal-active .reveal-card:nth-child(2) { transition-delay: 60ms; } .reveal-active .reveal-card:nth-child(3) { transition-delay: 120ms; } .reveal-active .reveal-card:nth-child(4) { transition-delay: 180ms; } }
+@media (prefers-reduced-motion: reduce) { .js-enabled .reveal-label, .js-enabled .reveal-heading, .js-enabled .reveal-link, .js-enabled .reveal-card { opacity: 1 !important; transform: none !important; transition: none !important; } }
+</style>
+<style>
+.js-enabled .reveal-benefit-item { opacity: 0; transform: translateY(16px); }
+.js-enabled .reveal-benefit-item .benefit-icon { transform: scale(0.94); transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1); }
+.benefits-active .reveal-benefit-item { opacity: 1; transform: translateY(0); transition: opacity 560ms cubic-bezier(0.22, 1, 0.36, 1), transform 560ms cubic-bezier(0.22, 1, 0.36, 1); }
+.benefits-active .reveal-benefit-item .benefit-icon { transform: scale(1); }
+.benefits-active .reveal-benefit-item:nth-child(1) { transition-delay: 0ms; }
+.benefits-active .reveal-benefit-item:nth-child(2) { transition-delay: 100ms; }
+.benefits-active .reveal-benefit-item:nth-child(3) { transition-delay: 200ms; }
+.benefits-active .reveal-benefit-item:nth-child(4) { transition-delay: 300ms; }
+@media (max-width: 768px) {
+.js-enabled .reveal-benefit-item { transform: translateY(10px); }
+.benefits-active .reveal-benefit-item { transition: opacity 480ms cubic-bezier(0.22, 1, 0.36, 1), transform 480ms cubic-bezier(0.22, 1, 0.36, 1); }
+.benefits-active .reveal-benefit-item:nth-child(1) { transition-delay: 0ms; }
+.benefits-active .reveal-benefit-item:nth-child(2) { transition-delay: 70ms; }
+.benefits-active .reveal-benefit-item:nth-child(3) { transition-delay: 140ms; }
+.benefits-active .reveal-benefit-item:nth-child(4) { transition-delay: 210ms; }
+}
+@media (prefers-reduced-motion: reduce) {
+.js-enabled .reveal-benefit-item, .js-enabled .reveal-benefit-item .benefit-icon { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
+</style>
+<style>
+.js-enabled .reveal-process-heading,
+.js-enabled .reveal-process-subtitle { opacity: 0; transform: translateY(20px); }
+.js-enabled .reveal-process-card { opacity: 0; transform: translateY(28px) scale(0.985); }
+.js-enabled .reveal-process-card .process-badge { transform: scale(0.9); transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1); }
+.js-enabled .reveal-process-line { transform: scaleX(0); }
+.process-active .reveal-process-heading { opacity: 1; transform: translateY(0); transition: opacity 800ms cubic-bezier(0.22, 1, 0.36, 1), transform 800ms cubic-bezier(0.22, 1, 0.36, 1); }
+.process-active .reveal-process-subtitle { opacity: 1; transform: translateY(0); transition: opacity 800ms cubic-bezier(0.22, 1, 0.36, 1) 120ms, transform 800ms cubic-bezier(0.22, 1, 0.36, 1) 120ms; }
+.process-active .reveal-process-card { opacity: 1; transform: translateY(0) scale(1); transition: opacity 750ms cubic-bezier(0.22, 1, 0.36, 1), transform 750ms cubic-bezier(0.22, 1, 0.36, 1); }
+.process-active .reveal-process-card .process-badge { transform: scale(1); }
+.process-active .reveal-process-line { transform: scaleX(1); transition: transform 1400ms cubic-bezier(0.22, 1, 0.36, 1) 400ms; }
+.process-active .reveal-process-card:nth-child(2) { transition-delay: 100ms; }
+.process-active .reveal-process-card:nth-child(3) { transition-delay: 280ms; }
+.process-active .reveal-process-card:nth-child(4) { transition-delay: 460ms; }
+.process-active .reveal-process-card:nth-child(5) { transition-delay: 640ms; }
+@media (max-width: 768px) {
+.js-enabled .reveal-process-card { transform: translateY(16px) scale(0.985); }
+.process-active .reveal-process-card { transition: opacity 620ms cubic-bezier(0.22, 1, 0.36, 1), transform 620ms cubic-bezier(0.22, 1, 0.36, 1); }
+.process-active .reveal-process-card:nth-child(2) { transition-delay: 0ms; }
+.process-active .reveal-process-card:nth-child(3) { transition-delay: 130ms; }
+.process-active .reveal-process-card:nth-child(4) { transition-delay: 260ms; }
+.process-active .reveal-process-card:nth-child(5) { transition-delay: 390ms; }
+}
+@media (prefers-reduced-motion: reduce) {
+.js-enabled .reveal-process-heading,
+.js-enabled .reveal-process-subtitle,
+.js-enabled .reveal-process-card,
+.js-enabled .reveal-process-card .process-badge,
+.js-enabled .reveal-process-line { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
+@media (min-width: 769px) {
+.process-card-hover { transition: transform 260ms ease, border-color 260ms ease, box-shadow 260ms ease, background-color 260ms ease; }
+.process-card-hover:hover { transform: translateY(-4px) scale(1); border-color: rgba(255, 60, 60, 0.3); box-shadow: 0 10px 30px -10px rgba(255, 60, 60, 0.05); }
+.process-card-hover:hover .process-icon { color: #FF3C3C; transition: color 260ms ease; }
+.process-card-hover:hover .process-badge-dynamic { background-color: #FF3C3C; transition: background-color 260ms ease; }
+}
+</style>
+<style>
+.js-enabled .reveal-testimonial-heading { opacity: 0; transform: translateY(18px); }
+.testimonials-active .reveal-testimonial-heading { opacity: 1; transform: translateY(0); transition: opacity 650ms cubic-bezier(0.22, 1, 0.36, 1), transform 650ms cubic-bezier(0.22, 1, 0.36, 1); }
+.testimonials-active .reveal-testimonial-heading:nth-child(2) { transition-delay: 100ms; }
+@media (min-width: 768px) {
+.js-enabled .reveal-testimonial-card { opacity: 0; transform: translateY(22px); }
+.testimonials-active .reveal-testimonial-card { opacity: 1; transform: translateY(0); transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1), transform 600ms cubic-bezier(0.22, 1, 0.36, 1); }
+.testimonials-active .reveal-testimonial-card:nth-child(1) { transition-delay: 0ms; }
+.testimonials-active .reveal-testimonial-card:nth-child(2) { transition-delay: 100ms; }
+.testimonials-active .reveal-testimonial-card:nth-child(3) { transition-delay: 200ms; }
+.testimonial-card-hover { transition: transform 260ms ease, border-color 260ms ease, box-shadow 260ms ease; }
+.testimonials-active .testimonial-card-hover:hover { transform: translateY(-4px); border-color: rgba(255, 60, 60, 0.3); box-shadow: 0 10px 30px -10px rgba(255, 60, 60, 0.08); }
+}
+@media (max-width: 767px) {
+.js-enabled .reveal-testimonial-container { opacity: 0; transform: translateY(12px); }
+.testimonials-active .reveal-testimonial-container { opacity: 1; transform: translateY(0); transition: opacity 550ms cubic-bezier(0.22, 1, 0.36, 1) 100ms, transform 550ms cubic-bezier(0.22, 1, 0.36, 1) 100ms; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+.js-enabled .reveal-testimonial-heading, .js-enabled .reveal-testimonial-card, .js-enabled .reveal-testimonial-container { opacity: 1 !important; transform: none !important; transition: none !important; }
+.testimonials-active .testimonial-card-hover:hover { transform: none !important; }
+}
+</style>
+<style>
+@media (max-width: 767px) {
+.js-enabled #services-carousel .reveal-card {
+opacity: 1 !important; transform: none !important; transition: none !important;
+}
+.js-enabled .reveal-carousel-container { opacity: 0; transform: translateY(12px); }
+.reveal-active .reveal-carousel-container { opacity: 1; transform: none; transition: opacity 550ms cubic-bezier(0.22, 1, 0.36, 1) 100ms, transform 550ms cubic-bezier(0.22, 1, 0.36, 1) 100ms; }
+.js-enabled .reveal-carousel-pagination { opacity: 0; transform: translateY(12px); }
+.reveal-active .reveal-carousel-pagination { opacity: 1; transform: none; transition: opacity 550ms cubic-bezier(0.22, 1, 0.36, 1) 150ms, transform 550ms cubic-bezier(0.22, 1, 0.36, 1) 150ms; }
+}
+@media (prefers-reduced-motion: reduce) {
+.js-enabled .reveal-carousel-container, .js-enabled .reveal-carousel-pagination { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
+</style>
+<style>
+@media (max-width: 767px) {
+.services-carousel-viewport {
+width: 100%;
+max-width: 100%;
+overflow-x: auto;
+overflow-y: visible;
+scroll-snap-type: x mandatory;
+scroll-behavior: smooth;
+overscroll-behavior-x: contain;
+-webkit-overflow-scrolling: touch;
+box-sizing: border-box;
+scrollbar-width: none;
+}
+.services-carousel-viewport::-webkit-scrollbar {
+display: none;
+}
+.services-carousel-track {
+display: flex;
+width: 100%;
+align-items: stretch;
+}
+.service-slide {
+flex: 0 0 100%;
+width: 100%;
+min-width: 100%;
+scroll-snap-align: center;
+scroll-snap-stop: always;
+display: flex;
+justify-content: center;
+align-items: stretch;
+padding-inline: 20px;
+box-sizing: border-box;
+}
+.service-card {
+width: 100%;
+max-width: 320px;
+margin-inline: auto;
+box-sizing: border-box;
+}
+.services-pagination {
+width: 100%;
+display: flex;
+justify-content: center;
+align-items: center;
+gap: 8px;
+margin-top: 20px;
+}
+}
+@media (max-width: 380px) {
+.service-slide {
+padding-inline: 16px;
+}
+.service-card {
+max-width: 100%;
+}
+}
+.services-section,
+.services-container {
+width: 100%;
+max-width: 100%;
+box-sizing: border-box;
+overflow: hidden;
+}
+html, body {
+max-width: 100%;
+overflow-x: hidden;
+}
+.service-card img {
+width: 100%;
+aspect-ratio: 4 / 3;
+object-fit: cover;
+display: block;
+}
+</style>
+<style>
+.home-form-honeypot {
+position: absolute;
+left: -9999px;
+width: 1px;
+height: 1px;
+overflow: hidden;
+}
+@keyframes slideFadeUp {
+from { opacity: 0; transform: translateY(10px); }
+to { opacity: 1; transform: translateY(0); }
+}
+.status-animate {
+animation: slideFadeUp 350ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+.status-animate { animation: none; opacity: 1; transform: none; }
+}
+</style>
+<style>
+.ba-instruction{display:none}
+@media (max-width:767px){.ba-instruction{display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;color:#B0B0B0;margin-bottom:20px}}
+.completed-project{background:#1A1D21;border:1px solid #2A2E34;border-radius:18px;overflow:hidden;transition:border-color 300ms ease}
+.completed-project:hover{border-color:rgba(255,60,60,0.4)}
+.before-after{position:relative;width:100%;aspect-ratio:4 / 3;overflow:hidden;border-radius:18px 18px 0 0;touch-action:pan-y;user-select:none}
+.before-after__image{width:100%;height:100%;object-fit:cover;object-position:center;display:block;position:absolute;inset:0;pointer-events:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
+.before-after--portrait {
+aspect-ratio: 3 / 4;
+background: #0D0D0D;
+}
+.before-after--portrait .before-after__image {
+object-fit: contain;
+object-position: center;
+}
+.before-after__before{position:absolute;inset:0;width:var(--position,50%);overflow:hidden}
+.before-after__before .before-after__image{width:100%;height:100%}
+.before-after__before-inner{position:absolute;inset:0;width:100vw;max-width:none;height:100%}
+.before-after__label{position:absolute;top:14px;z-index:6;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;color:#FFFFFF;background:rgba(13,13,13,0.7);backdrop-filter:blur(4px);padding:4px 10px;border-radius:6px;border:1px solid #2A2E34;pointer-events:none}
+.before-after__label--before{left:14px}
+.before-after__label--after{right:14px;border-color:rgba(255,60,60,0.5)}
+.before-after__range{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize;z-index:8;-webkit-appearance:none;appearance:none;background:transparent;pointer-events:none}
+.before-after__range:focus-visible{outline:none}
+.before-after__range:focus-visible ~ .before-after__divider .before-after__handle{box-shadow:0 0 0 3px rgba(255,60,60,0.6),0 4px 14px rgba(0,0,0,0.5)}
+.before-after__divider{position:absolute;top:0;bottom:0;left:var(--position,50%);width:2px;background:rgba(255,255,255,0.9);box-shadow:0 0 8px rgba(0,0,0,0.6);transform:translateX(-1px);z-index:7;pointer-events:none}
+.before-after__handle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:9999px;background:#0D0D0D;border:2px solid #FF3C3C;display:flex;align-items:center;justify-content:center;gap:2px;color:#FFFFFF;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,0.5)}
+@media (max-width:767px){.before-after__handle{width:48px;height:48px}}
+.completed-project__info{padding:18px 20px}
+.completed-project__info h3{font-family:'Montserrat';font-weight:500;font-size:1.05rem;letter-spacing:-0.01em;color:#FFFFFF}
+.js-enabled .reveal-ba-card{opacity:0;transform:translateY(18px)}
+.ba-active .reveal-ba-card{opacity:1;transform:translateY(0);transition:opacity 600ms cubic-bezier(0.22,1,0.36,1),transform 600ms cubic-bezier(0.22,1,0.36,1)}
+.ba-active .reveal-ba-card:nth-child(1){transition-delay:0ms}
+.ba-active .reveal-ba-card:nth-child(2){transition-delay:100ms}
+.ba-active .reveal-ba-card:nth-child(3){transition-delay:200ms}
+.ba-active .reveal-ba-card:nth-child(4){transition-delay:300ms}
+@media (prefers-reduced-motion:reduce){.js-enabled .reveal-ba-card{opacity:1!important;transform:none!important;transition:none!important}}
+</style></head>
+  <body class="bg-[#0D0D0D] text-[#FFFFFF] font-['Inter'] antialiased overflow-x-hidden selection:bg-[#FF3C3C] selection:text-white">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-[60] backdrop-blur-xl border-b border-[#2A2E34] transition-all duration-300" id="navbar">
+      <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <a href="index.html" class="flex items-center">
+          <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/3871496e-39e1-4585-8640-6ddf47904d4d_800w.png" alt="AGM Custom Paint's logo" class="h-[52px] md:h-[58px] w-auto max-w-[150px] object-contain drop-shadow-md">
+        </a>
+        <div class="hidden md:flex items-center gap-8 text-sm font-medium text-[#B0B0B0]">
+          <a href="servicios.html" class="hover:text-[#FFFFFF] transition-colors">
+            Servicios
+          </a>
+          <a href="#proceso" class="hover:text-[#FFFFFF] transition-colors">
+            Proceso
+          </a>
+          <a href="#galeria" class="hover:text-[#FFFFFF] transition-colors">
+            Galería
+          </a>
+          <a href="contacto.html" class="hover:text-[#FFFFFF] transition-colors">
+            Contacto
+          </a>
+        </div>
+        <div class="flex items-center gap-4">
+          <a href="tel:+17875564310" class="hidden md:flex text-[#FFFFFF] hover:text-[#FF3C3C] transition-colors items-center gap-2">
+            <iconify-icon icon="solar:phone-linear" stroke-width="1.5" class="text-2xl"></iconify-icon>
+            <span class="font-semibold text-sm">(787) 556-4310</span>
+          </a>
+          <button id="mobile-menu-btn" type="button" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="mobile-menu" class="md:hidden relative w-11 h-11 flex flex-col items-center justify-center gap-[6px] bg-transparent border-0 focus:outline-none focus:ring-2 focus:ring-[#FF3C3C] rounded group">
+            <span class="block w-6 h-[2px] bg-white group-hover:bg-[#FF3C3C] group-focus:bg-[#FF3C3C] transition-colors"></span>
+            <span class="block w-6 h-[2px] bg-white group-hover:bg-[#FF3C3C] group-focus:bg-[#FF3C3C] transition-colors"></span>
+            <span class="block w-6 h-[2px] bg-white group-hover:bg-[#FF3C3C] group-focus:bg-[#FF3C3C] transition-colors"></span>
+          </button>
+        </div>
+      </div>
+    </nav>
+    <div id="mobile-menu-overlay" class="md:hidden fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-[250ms]"></div>
+    <aside id="mobile-menu" aria-hidden="true" tabindex="-1" class="md:hidden fixed top-0 right-0 z-[80] h-full w-[85%] max-w-[340px] bg-[#0D0D0D] border-l border-[#2A2E34] translate-x-full transition-transform duration-[250ms] ease-in-out overflow-y-auto flex flex-col">
+      <div class="flex items-center justify-between px-6 h-20 border-b border-[#2A2E34]">
+        <a href="index.html" class="flex items-center">
+          <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/3871496e-39e1-4585-8640-6ddf47904d4d_800w.png" alt="AGM Custom Paint's logo" class="h-[48px] w-auto max-w-[135px] object-contain drop-shadow-md">
+        </a>
+        <button id="close-menu-btn" type="button" aria-label="Cerrar menú de navegación" class="w-11 h-11 bg-transparent border-0 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#FF3C3C] rounded group">
+          <iconify-icon icon="solar:close-circle-linear" class="text-[32px] text-white group-hover:text-[#FF3C3C] group-focus:text-[#FF3C3C] transition-colors"></iconify-icon>
+        </button>
+      </div>
+      <nav class="flex flex-col px-6 py-4">
+        <a href="servicios.html" class="mobile-nav-link flex items-center min-h-[48px] text-white text-[18px] font-medium border-b border-[#2A2E34] hover:text-[#FF3C3C] focus:text-white focus:outline-none transition-colors">
+          Servicios
+        </a>
+        <a href="#proceso" class="mobile-nav-link flex items-center min-h-[48px] text-white text-[18px] font-medium border-b border-[#2A2E34] hover:text-[#FF3C3C] focus:text-white focus:outline-none transition-colors">
+          Proceso
+        </a>
+        <a href="#galeria" class="mobile-nav-link flex items-center min-h-[48px] text-white text-[18px] font-medium border-b border-[#2A2E34] hover:text-[#FF3C3C] focus:text-white focus:outline-none transition-colors">
+          Galería
+        </a>
+        <a href="contacto.html" class="mobile-nav-link flex items-center min-h-[48px] text-white text-[18px] font-medium border-b border-[#2A2E34] hover:text-[#FF3C3C] focus:text-white focus:outline-none transition-colors">
+          Contacto
+        </a>
+        <a href="tel:+17875564310" class="flex items-center justify-center gap-2 min-h-[48px] mt-6 px-4 bg-[#FF3C3C] text-white font-medium text-base hover:bg-[#C62828] focus:outline-none focus:ring-2 focus:ring-white transition-colors w-full">
+          <iconify-icon icon="solar:phone-linear" stroke-width="1.5" class="text-xl"></iconify-icon>
+          (787) 556-4310
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 1. Hero Section -->
+    <section class="relative min-h-[70vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden pt-32 pb-16">
+      <!-- Cinematic Background -->
+      <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-gradient-to-b from-[#0D0D0D]/60 via-transparent to-[#0D0D0D] z-10"></div>
+        <!-- High quality dark automotive detail (simulating mirror focus) -->
+        <video src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/generated-videos/5e99dc9a-8d1a-41ca-adf6-2fc0f69238e0/1781141172950-d9aa26d8-83b1-4212-84c9-68bf17f63e5c.mp4" poster="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/96d538de-2129-40de-a9ca-47419ce6968e_3840w.png" data-aura-generated-video="true" data-aura-video-preset="loop-in-view" muted="" playsinline="" preload="metadata" loop="" aria-label="Premium Car Side Mirror" class="opacity-60 w-full h-full object-cover z-10 scale-110" id="hero-img"></video>
+      </div>
+
+      <div class="relative z-10 text-center max-w-4xl px-6 flex flex-col items-center mb-12 md:mb-8">
+        <div class="overflow-hidden flex w-full mb-6 justify-center">
+          <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/3871496e-39e1-4585-8640-6ddf47904d4d_800w.png" alt="AGM Custom Paint's logo" class="h-40 md:h-64 w-auto drop-shadow-[0_4px_16px_rgba(0,0,0,0.5)] hero-text gsap-reveal">
+        </div>
+        <div class="overflow-hidden mb-4">
+          <h1 class="text-5xl md:text-7xl font-['Montserrat'] font-semibold tracking-tight leading-tight hero-text gsap-reveal">
+            Hojalatería y Pintura
+          </h1>
+        </div>
+        <div class="overflow-hidden mb-6">
+          <h1 class="text-5xl md:text-7xl font-['Montserrat'] font-semibold tracking-tight leading-tight text-[#B0B0B0] hero-text gsap-reveal">
+            Customizada en Rio Grande
+          </h1>
+        </div>
+        <div class="overflow-hidden mb-10">
+          <p class="text-base md:text-lg text-[#B0B0B0] max-w-xl mx-auto font-light hero-text gsap-reveal">
+            <span class="font-medium text-[#FFFFFF]">#AhiNoPasoNada.</span>
+            Reparamos choques, restauramos detalles y devolvemos la apariencia
+            de tu vehículo con acabados profesionales y atención al detalle.
+          </p>
+        </div>
+        <div class="hero-text gsap-reveal">
+          <div class="flex flex-col sm:flex-row gap-4 justify-center w-full hero-text gsap-reveal">
+            <a href="tel:+17875564310" class="inline-flex items-center justify-center px-8 py-4 bg-[#FF3C3C] text-[#FFFFFF] font-medium text-sm hover:bg-[#C62828] transition-all duration-300 group">
+              Llamar Ahora
+              <iconify-icon icon="solar:phone-linear" stroke-width="1.5" class="ml-2 text-xl"></iconify-icon>
+            </a>
+            <a href="https://wa.me/17875564310?text=Hola%20AGM%20Custom%20Paint%E2%80%99s%2C%20me%20gustar%C3%ADa%20solicitar%20una%20cotizaci%C3%B3n%20para%20mi%20veh%C3%ADculo." target="_blank" class="inline-flex items-center justify-center px-8 py-4 bg-transparent border border-[#2A2E34] text-[#FFFFFF] font-medium text-sm hover:border-[#FFFFFF] transition-all duration-300 group">
+              Cotizar por WhatsApp
+              <iconify-icon icon="solar:letter-linear" stroke-width="1.5" class="ml-2 text-xl"></iconify-icon>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scroll Indicator -->
+      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center opacity-50 hero-text gsap-reveal">
+        <span class="uppercase text-xs tracking-widest mb-2 text-center">
+          Explora nuestro trabajo
+        </span>
+        <div class="w-[1px] h-8 bg-gradient-to-b from-[#FFFFFF] to-transparent overflow-hidden">
+          <div class="w-full h-1/2 bg-[#FF3C3C] animate-[slideDown_2s_ease-in-out_infinite]"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Story / Tech Section -->
+    <section id="about" class="pt-12 pb-32 bg-[#0D0D0D] relative z-20">
+      <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+        <div class="order-2 md:order-1 relative group gsap-fade-up w-full">
+          <div class="paint-media paint-media-desktop hidden md:block relative w-full h-[600px] rounded-2xl overflow-hidden">
+            <div class="group-hover:opacity-100 transition-opacity duration-700 z-10 bg-[#FF3C3C]/10 opacity-80 absolute top-0 right-0 bottom-0 left-0 pointer-events-none"></div>
+            <video src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/generated-videos/5e99dc9a-8d1a-41ca-adf6-2fc0f69238e0/1781560652798-b504c4a9-dbf2-44b2-8542-e13264a275dc.mp4" poster="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/c9dc45ab-0406-4271-9764-78cf253c4232_3840w.png" data-aura-generated-video="true" data-aura-video-preset="loop-in-view" muted="" playsinline="" preload="metadata" loop="" aria-label="ORVM Engineering" class="group-hover:grayscale-0 transition-all duration-700 group-hover:scale-100 w-full h-full object-cover scale-105"></video>
+          </div>
+          <div class="paint-media paint-media-mobile block md:hidden relative w-full max-w-[340px] mx-auto aspect-[4/5] rounded-2xl overflow-hidden">
+            <div class="group-hover:opacity-100 transition-opacity duration-700 z-10 bg-[#FF3C3C]/10 opacity-80 absolute top-0 right-0 bottom-0 left-0 pointer-events-none"></div>
+            <video src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/generated-videos/5e99dc9a-8d1a-41ca-adf6-2fc0f69238e0/1781561057540-7e6b6d80-0f35-4691-956a-e79710ff2107.mp4" poster="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/c9dc45ab-0406-4271-9764-78cf253c4232_3840w.png" data-aura-generated-video="true" data-aura-video-preset="loop-in-view" muted="" playsinline="" preload="metadata" loop="" aria-label="Paint Booth Mobile" class="group-hover:grayscale-0 transition-all duration-700 group-hover:scale-100 w-full h-full object-cover object-center block scale-105"></video>
+          </div>
+        </div>
+        <div class="order-1 md:order-2 flex flex-col justify-center">
+          <span class="text-[#FF3C3C] text-sm font-medium tracking-widest uppercase mb-4 block gsap-fade-up">
+            AGM Custom Paint's
+          </span>
+          <h2 class="text-4xl md:text-5xl font-['Montserrat'] font-medium tracking-tight mb-8 leading-tight gsap-fade-up">
+            Más que reparar, devolvemos presencia.
+          </h2>
+
+          <div class="space-y-8">
+            <div class="flex gap-4 gsap-fade-up">
+              <div class="mt-1 flex-shrink-0 w-10 h-10 rounded-full bg-[#1A1D21] border border-[#2A2E34] flex items-center justify-center text-[#FFFFFF]">
+                <iconify-icon icon="solar:eye-linear" stroke-width="1.5" class="text-xl"></iconify-icon>
+              </div>
+              <div class="">
+                <h3 class="text-xl font-['Montserrat'] font-medium mb-2 tracking-tight">
+                  10 Años de Experiencia
+                </h3>
+                <p class="text-sm text-[#B0B0B0] font-light leading-relaxed">
+                  Una década perfeccionando el arte de la hojalatería y pintura
+                  automotriz en Puerto Rico.
+                </p>
+              </div>
+            </div>
+            <div class="flex gap-4 gsap-fade-up">
+              <div class="mt-1 flex-shrink-0 w-10 h-10 rounded-full bg-[#1A1D21] border border-[#2A2E34] flex items-center justify-center text-[#FFFFFF]">
+                <iconify-icon icon="solar:shield-check-linear" stroke-width="1.5" class="text-xl"></iconify-icon>
+              </div>
+              <div class="">
+                <h3 class="text-xl font-['Montserrat'] font-medium mb-2 tracking-tight">
+                  Atención al Detalle
+                </h3>
+                <p class="text-sm text-[#B0B0B0] font-light leading-relaxed">
+                  Nos enfocamos en cada línea y curva para asegurar un acabado
+                  impecable en cada reparación.
+                </p>
+              </div>
+            </div>
+            <div class="flex gap-4 gsap-fade-up">
+              <div class="mt-1 flex-shrink-0 w-10 h-10 rounded-full bg-[#1A1D21] border border-[#2A2E34] flex items-center justify-center text-[#FFFFFF]">
+                <iconify-icon icon="solar:screencast-2-linear" stroke-width="1.5" class="text-xl"></iconify-icon>
+              </div>
+              <div class="">
+                <h3 class="text-xl font-['Montserrat'] font-medium mb-2 tracking-tight">
+                  Compromiso con la Calidad
+                </h3>
+                <p class="text-sm text-[#B0B0B0] font-light leading-relaxed">
+                  Utilizamos materiales de primera y técnicas avanzadas para
+                  devolverle a tu vehículo su mejor apariencia.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Problem -> Solution -->
+
+    <!-- 4. Product Showcase -->
+    <section id="servicios" class="py-32 bg-[#0D0D0D] js-reveal-section services-section reveal-active">
+      <div class="max-w-7xl mx-auto px-0 md:px-6 w-full box-border services-container">
+        <div class="flex flex-col items-center md:flex-row md:justify-between md:items-end md:gap-4 mb-7 md:mb-16 w-full text-center md:text-left px-6 md:px-0">
+          <div class="flex flex-col items-center md:items-start w-full">
+            <span class="text-[#FF3C3C] text-sm font-medium tracking-widest uppercase mb-2 block reveal-label">
+              SERVICIOS
+            </span>
+            <h2 class="text-4xl md:text-5xl font-['Montserrat'] font-semibold tracking-tight reveal-heading max-w-[330px] mx-auto md:mx-0 px-4 md:px-0">
+              Servicios para tu Vehículo
+            </h2>
+            <a href="servicios.html" class="md:hidden mt-6 inline-flex items-center justify-center gap-[10px] w-[88%] max-w-[330px] min-h-[52px] mx-auto bg-[#FF3C3C] text-[#FFFFFF] font-bold text-base rounded-none hover:bg-[#ff4f4f] border border-[#FF3C3C] shadow-[0_4px_14px_rgba(255,60,60,0.25)] transition-all duration-[220ms] hover:-translate-y-[2px] group reveal-heading">
+              Ver Todos los Servicios
+              <iconify-icon icon="solar:arrow-right-linear" stroke-width="1.5" class="text-xl transition-transform duration-[220ms] group-hover:translate-x-[3px]"></iconify-icon>
+            </a>
+            <p class="md:hidden mt-[14px] text-sm text-[#B0B0B0] inline-flex justify-center items-center gap-[8px] w-full reveal-heading">
+              Desliza para ver más
+              <iconify-icon icon="solar:arrow-right-linear" class="text-lg"></iconify-icon>
+            </p>
+          </div>
+          <a href="servicios.html" class="hidden md:inline-flex justify-center items-center text-sm text-[#B0B0B0] hover:text-[#FFFFFF] transition-colors pb-1 border-b border-transparent hover:border-[#FFFFFF] reveal-link mx-auto md:mx-0 mt-3 md:mt-0">
+            Ver Todos los Servicios
+            <iconify-icon icon="solar:arrow-right-linear" stroke-width="1.5" class="ml-1" width="14" height="14" style="color: rgb(255, 255, 255);"></iconify-icon>
+          </a>
+        </div>
+
+        <div class="services-carousel-viewport md:!overflow-visible reveal-carousel-container" id="services-carousel">
+          <div class="services-carousel-track md:grid md:grid-cols-4 md:gap-6 md:w-full md:px-0">
+            <div class="service-slide md:block md:w-auto md:min-w-0 md:p-0">
+              <a href="servicios.html" class="service-card md:max-w-none md:w-auto md:mx-0 group bg-[#1A1D21] border border-[#2A2E34] rounded-2xl p-4 transition-all flex flex-col reveal-card md:hover:-translate-y-[4px] md:hover:border-[#FF3C3C]/50 md:hover:bg-[#1E2226] duration-[250ms]">
+                <div class="bg-[#0D0D0D] rounded-xl mb-4 flex items-center justify-center overflow-hidden relative">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/749812b5-a0d5-483f-a89a-af096cde97a0_3840w.png" alt="Reparación de Hojalatería" class="opacity-80 transition-all filter grayscale w-full h-full object-cover md:group-hover:scale-[1.025] md:group-hover:opacity-100 duration-[250ms] md:group-hover:grayscale-0 block" loading="lazy" decoding="async" onclick="window.location.href='servicios.html'" role="button">
+                </div>
+                <div class="mt-auto flex items-center justify-between">
+                  <h3 class="text-base font-medium truncate pr-2">
+                    Reparación de Hojalatería
+                  </h3>
+                  <div class="w-8 h-8 rounded-full bg-[#2A2E34] flex items-center justify-center text-[#B0B0B0] group-hover:bg-[#FFFFFF] group-hover:text-[#0D0D0D] transition-all duration-[250ms] flex-shrink-0 cursor-pointer" onclick="window.location.href='servicios.html'" role="button">
+                    <iconify-icon icon="solar:arrow-right-linear" stroke-width="1.5" class="transition-transform duration-[250ms] group-hover:translate-x-[2px]"></iconify-icon>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class="service-slide md:block md:w-auto md:min-w-0 md:p-0">
+              <a href="servicios.html" class="service-card md:max-w-none md:w-auto md:mx-0 group bg-[#1A1D21] border border-[#2A2E34] rounded-2xl p-4 transition-all flex flex-col reveal-card md:hover:-translate-y-[4px] md:hover:border-[#FF3C3C]/50 md:hover:bg-[#1E2226] duration-[250ms]">
+                <div class="bg-[#0D0D0D] rounded-xl mb-4 flex items-center justify-center overflow-hidden relative">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/e97f2ac9-394a-414e-baea-b25ac9991058_3840w.png" alt="Reparación de Choques" class="opacity-80 transition-all filter grayscale w-full h-full object-cover md:group-hover:scale-[1.025] md:group-hover:opacity-100 duration-[250ms] md:group-hover:grayscale-0 block" loading="lazy" decoding="async" onclick="window.location.href='servicios.html'" role="button">
+                </div>
+                <div class="mt-auto flex items-center justify-between" onclick="window.location.href='servicios.html'" role="button">
+                  <h3 class="text-base font-medium truncate pr-2" onclick="window.location.href='servicios.html'" role="button">
+                    Reparación de Choques
+                  </h3>
+                  <div class="w-8 h-8 rounded-full bg-[#2A2E34] flex items-center justify-center text-[#B0B0B0] group-hover:bg-[#FFFFFF] group-hover:text-[#0D0D0D] transition-all duration-[250ms] flex-shrink-0" onclick="window.location.href='servicios.html'" role="button">
+                    <iconify-icon icon="solar:arrow-right-linear" stroke-width="1.5" class="transition-transform duration-[250ms] group-hover:translate-x-[2px]"></iconify-icon>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class="service-slide md:block md:w-auto md:min-w-0 md:p-0">
+              <a href="servicios.html" class="service-card md:max-w-none md:w-auto md:mx-0 group bg-[#1A1D21] border border-[#2A2E34] rounded-2xl p-4 transition-all flex flex-col reveal-card md:hover:-translate-y-[4px] md:hover:border-[#FF3C3C]/50 md:hover:bg-[#1E2226] duration-[250ms]">
+                <div class="bg-[#0D0D0D] rounded-xl mb-4 flex items-center justify-center overflow-hidden relative">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/98facb93-499e-4275-bae7-e83a63f41dae_3840w.png" alt="Pintura Automotriz" class="opacity-80 transition-all filter grayscale w-full h-full object-cover md:group-hover:scale-[1.025] md:group-hover:opacity-100 duration-[250ms] md:group-hover:grayscale-0 block" loading="lazy" decoding="async">
+                </div>
+                <div class="mt-auto flex items-center justify-between">
+                  <h3 class="text-base font-medium truncate pr-2">
+                    Pintura Automotriz
+                  </h3>
+                  <div class="w-8 h-8 rounded-full bg-[#2A2E34] flex items-center justify-center text-[#B0B0B0] group-hover:bg-[#FFFFFF] group-hover:text-[#0D0D0D] transition-all duration-[250ms] flex-shrink-0" onclick="window.location.href='servicios.html'" role="button">
+                    <iconify-icon icon="solar:arrow-right-linear" stroke-width="1.5" class="transition-transform duration-[250ms] group-hover:translate-x-[2px]"></iconify-icon>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class="service-slide md:block md:w-auto md:min-w-0 md:p-0">
+              <a href="servicios.html" class="service-card md:max-w-none md:w-auto md:mx-0 group bg-[#1A1D21] border border-[#2A2E34] rounded-2xl p-4 transition-all flex flex-col reveal-card md:hover:-translate-y-[4px] md:hover:border-[#FF3C3C]/50 md:hover:bg-[#1E2226] duration-[250ms]">
+                <div class="bg-[#0D0D0D] rounded-xl mb-4 flex items-center justify-center overflow-hidden relative">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/c77c12b3-a63d-4e27-8d71-2a96e1746cb1_3840w.png" alt="Pulido y Sellado" class="opacity-80 transition-all filter grayscale w-full h-full object-cover md:group-hover:scale-[1.025] md:group-hover:opacity-100 duration-[250ms] md:group-hover:grayscale-0 block" loading="lazy" decoding="async">
+                </div>
+                <div class="mt-auto flex items-center justify-between">
+                  <h3 class="text-base font-medium truncate pr-2">
+                    Pulido y Sellado
+                  </h3>
+                  <div class="w-8 h-8 rounded-full bg-[#2A2E34] flex items-center justify-center text-[#B0B0B0] group-hover:bg-[#FFFFFF] group-hover:text-[#0D0D0D] transition-all duration-[250ms] flex-shrink-0" onclick="window.location.href='servicios.html'" role="button">
+                    <iconify-icon icon="solar:arrow-right-linear" stroke-width="1.5" class="transition-transform duration-[250ms] group-hover:translate-x-[2px]"></iconify-icon>
+                  </div>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div id="services-pagination" class="services-pagination md:hidden reveal-carousel-pagination px-6 md:px-0">
+          <button class="w-2.5 h-2.5 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#FF3C3C]/50 bg-[#FF3C3C]" aria-label="Ver servicio 1"></button>
+          <button class="w-2.5 h-2.5 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#B0B0B0]/50 bg-[#2A2E34] hover:bg-[#B0B0B0]" aria-label="Ver servicio 2"></button>
+          <button class="w-2.5 h-2.5 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#B0B0B0]/50 bg-[#2A2E34] hover:bg-[#B0B0B0]" aria-label="Ver servicio 3"></button>
+          <button class="w-2.5 h-2.5 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#B0B0B0]/50 bg-[#2A2E34] hover:bg-[#B0B0B0]" aria-label="Ver servicio 4"></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Trust / Guarantees -->
+    <section class="py-20 bg-[#0D0D0D] border-t border-[#2A2E34] benefits-active" id="benefits-section">
+      <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4 divide-x-0 md:divide-x divide-[#2A2E34]">
+        <div class="reveal-benefit-item group flex flex-col items-center text-center px-4 transition-transform duration-[220ms] md:hover:-translate-y-[3px]">
+          <iconify-icon icon="solar:medal-ribbon-linear" stroke-width="1.5" class="text-4xl text-[#FFFFFF] mb-4 benefit-icon group-hover:text-[#FF3C3C] transition-colors duration-[220ms]"></iconify-icon>
+          <h4 class="text-sm font-['Montserrat'] font-medium mb-1 group-hover:text-[#FF3C3C] transition-colors duration-[220ms]">
+            10 Años de Experiencia
+          </h4>
+          <p class="text-xs text-[#B0B0B0] font-light">
+            Experiencia en hojalatería, pintura y reparación automotriz.
+          </p>
+        </div>
+        <div class="reveal-benefit-item group flex flex-col items-center text-center px-4 transition-transform duration-[220ms] md:hover:-translate-y-[3px]">
+          <iconify-icon icon="solar:eye-scan-linear" stroke-width="1.5" class="text-4xl text-[#FFFFFF] mb-4 benefit-icon group-hover:text-[#FF3C3C] transition-colors duration-[220ms]"></iconify-icon>
+          <h4 class="text-sm font-['Montserrat'] font-medium mb-1 group-hover:text-[#FF3C3C] transition-colors duration-[220ms]">
+            Atención al Detalle
+          </h4>
+          <p class="text-xs text-[#B0B0B0] font-light">
+            Cuidamos cada línea, superficie y acabado de tu vehículo.
+          </p>
+        </div>
+        <div class="reveal-benefit-item group flex flex-col items-center text-center px-4 transition-transform duration-[220ms] md:hover:-translate-y-[3px]">
+          <iconify-icon icon="solar:stars-linear" stroke-width="1.5" class="text-4xl text-[#FFFFFF] mb-4 benefit-icon group-hover:text-[#FF3C3C] transition-colors duration-[220ms]"></iconify-icon>
+          <h4 class="text-sm font-['Montserrat'] font-medium mb-1 group-hover:text-[#FF3C3C] transition-colors duration-[220ms]">
+            Acabados de Calidad
+          </h4>
+          <p class="text-xs text-[#B0B0B0] font-light">
+            Resultados limpios, profesionales y enfocados en durabilidad.
+          </p>
+        </div>
+        <div class="reveal-benefit-item group flex flex-col items-center text-center px-4 transition-transform duration-[220ms] md:hover:-translate-y-[3px]">
+          <iconify-icon icon="solar:heart-linear" stroke-width="1.5" class="text-4xl text-[#FFFFFF] mb-4 benefit-icon group-hover:text-[#FF3C3C] transition-colors duration-[220ms]"></iconify-icon>
+          <h4 class="text-sm font-['Montserrat'] font-medium mb-1 group-hover:text-[#FF3C3C] transition-colors duration-[220ms]">
+            Pasión por los Vehículos
+          </h4>
+          <p class="text-xs text-[#B0B0B0] font-light">
+            Trabajamos cada proyecto con dedicación y compromiso.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. How it works -->
+    <section class="py-32 bg-[#1A1D21] relative overflow-hidden js-process-section process-active" id="proceso">
+      <!-- Abstract bg shapes -->
+      <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-[#FF3C3C] rounded-full blur-[150px] opacity-[0.03] pointer-events-none"></div>
+      <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#FFFFFF] rounded-full blur-[150px] opacity-[0.02] pointer-events-none"></div>
+
+      <div class="max-w-7xl mx-auto px-6 relative z-10">
+        <h2 class="text-4xl md:text-5xl font-['Montserrat'] font-semibold tracking-tight text-center reveal-process-heading">
+          Así Trabajamos Tu Vehículo
+        </h2>
+        <p class="mt-4 mb-20 text-center text-[#B0B0B0] text-lg font-light reveal-process-subtitle">
+          Un proceso claro, profesional y enfocado en cada detalle.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
+          <div class="hidden md:block absolute top-[4rem] left-[10%] right-[10%] h-[1px] bg-[#2A2E34] z-0 origin-left reveal-process-line"></div>
+          <div class="bg-[#0D0D0D]/80 backdrop-blur border border-[#2A2E34] p-8 rounded-2xl relative z-10 reveal-process-card process-card-hover group flex flex-col h-full">
+            <div class="absolute -top-4 -left-4 w-10 h-10 bg-[#FF3C3C] text-[#FFFFFF] font-['Montserrat'] font-semibold flex items-center justify-center rounded-lg shadow-lg process-badge">
+              01
+            </div>
+            <iconify-icon icon="solar:document-add-linear" stroke-width="1.5" class="text-3xl text-[#B0B0B0] mb-6 process-icon"></iconify-icon>
+            <h3 class="text-lg font-medium mb-2 font-['Montserrat']">
+              Solicita tu Cotización
+            </h3>
+            <p class="text-sm text-[#B0B0B0] font-light">
+              Comunícate por llamada, WhatsApp o formulario y comparte los
+              detalles de tu vehículo.
+            </p>
+          </div>
+          <div class="bg-[#0D0D0D]/80 backdrop-blur border border-[#2A2E34] p-8 rounded-2xl relative z-10 reveal-process-card process-card-hover group flex flex-col h-full">
+            <div class="absolute -top-4 -left-4 w-10 h-10 bg-[#2A2E34] text-[#FFFFFF] font-['Montserrat'] font-semibold flex items-center justify-center rounded-lg shadow-lg process-badge process-badge-dynamic">
+              02
+            </div>
+            <iconify-icon icon="solar:calendar-search-linear" stroke-width="1.5" class="text-3xl text-[#B0B0B0] mb-6 process-icon"></iconify-icon>
+            <h3 class="text-lg font-medium mb-2 font-['Montserrat']">
+              Evaluación y Cita
+            </h3>
+            <p class="text-sm text-[#B0B0B0] font-light">
+              Revisamos la información o las fotos y coordinamos una cita para
+              evaluar el trabajo necesario.
+            </p>
+          </div>
+          <div class="bg-[#0D0D0D]/80 backdrop-blur border border-[#2A2E34] p-8 rounded-2xl relative z-10 reveal-process-card process-card-hover group flex flex-col h-full">
+            <div class="absolute -top-4 -left-4 w-10 h-10 bg-[#2A2E34] text-[#FFFFFF] font-['Montserrat'] font-semibold flex items-center justify-center rounded-lg shadow-lg process-badge process-badge-dynamic">
+              03
+            </div>
+            <iconify-icon icon="solar:clipboard-check-linear" stroke-width="1.5" class="text-3xl text-[#B0B0B0] mb-6 process-icon"></iconify-icon>
+            <h3 class="text-lg font-medium mb-2 font-['Montserrat']">
+              Confirmamos el Trabajo
+            </h3>
+            <p class="text-sm text-[#B0B0B0] font-light">
+              Te orientamos sobre el servicio recomendado y confirmamos los
+              detalles antes de comenzar.
+            </p>
+          </div>
+          <div class="bg-[#0D0D0D]/80 backdrop-blur border border-[#2A2E34] p-8 rounded-2xl relative z-10 reveal-process-card process-card-hover group flex flex-col h-full">
+            <div class="absolute -top-4 -left-4 w-10 h-10 bg-[#2A2E34] text-[#FFFFFF] font-['Montserrat'] font-semibold flex items-center justify-center rounded-lg shadow-lg process-badge process-badge-dynamic">
+              04
+            </div>
+            <iconify-icon icon="solar:car-linear" stroke-width="1.5" class="text-3xl text-[#B0B0B0] mb-6 process-icon"></iconify-icon>
+            <h3 class="text-lg font-medium mb-2 font-['Montserrat']">
+              Reparación y Entrega
+            </h3>
+            <p class="text-sm text-[#B0B0B0] font-light">
+              Realizamos el trabajo con atención al detalle para lograr un
+              acabado limpio y profesional.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Reviews Auto Slider -->
+    <section id="testimonios" class="pt-24 pb-32 md:py-24 bg-[#0D0D0D] overflow-hidden js-testimonials-section">
+      <div class="max-w-7xl mx-auto px-6 mb-16 text-center">
+        <h2 class="text-3xl md:text-4xl font-['Montserrat'] font-semibold tracking-tight reveal-testimonial-heading">
+          Lo Que Dicen Nuestros Clientes
+        </h2>
+        <p class="mt-4 text-[#B0B0B0] max-w-2xl mx-auto font-light reveal-testimonial-heading">
+          Opiniones de clientes que confiaron en nuestro trabajo de hojalatería,
+          pintura y restauración.
+        </p>
+      </div>
+
+      <div class="max-w-7xl mx-auto md:px-6 reveal-testimonial-container relative">
+        <div class="flex w-full md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth px-6 md:px-0 scroll-px-6 hide-scrollbar pb-4 md:pb-0" id="testimonials-carousel">
+          <!-- Testimonial 1 -->
+          <div class="w-[86vw] sm:w-[400px] md:w-auto flex-shrink-0 snap-center md:snap-align-none bg-[#1A1D21] border border-[#2A2E34] p-8 rounded-2xl flex flex-col h-full reveal-testimonial-card testimonial-card-hover group">
+            <div class="flex text-[#FF3C3C] mb-6">
+              <iconify-icon icon="solar:star-bold" class="text-lg"></iconify-icon>
+              <iconify-icon icon="solar:star-bold" class="text-lg"></iconify-icon>
+              <iconify-icon icon="solar:star-bold" class="text-lg"></iconify-icon>
+              <iconify-icon icon="solar:star-bold" class="text-lg"></iconify-icon>
+              <iconify-icon icon="solar:star-bold" class="text-lg"></iconify-icon>
+            </div>
+            <p class="text-[15px] text-[#B0B0B0] mb-8 font-light leading-relaxed flex-grow">
+              "Excelente servicio y atención. Me trabajaron la pintura y varios
+              detalles de hojalatería, y el carro quedó brutal. Se nota la
+              calidad y el cuidado en cada detalle."
+            </p>
+            <div class="mt-auto pt-6 border-t border-[#2A2E34]/50">
+              <p class="text-base font-medium">Carlos M.</p>
+              <p class="text-sm text-[#B0B0B0]">
+                Cliente de pintura y hojalatería
+              </p>
+            </div>
+          </div>
+          <!-- Testimonial 2 -->
+          <div class="w-[86vw] sm:w-[400px] md:w-auto flex-shrink-0 snap-center md:snap-align-none bg-[#1A1D21] border border-[#2A2E34] p-8 rounded-2xl flex flex-col h-full reveal-testimonial-card testimonial-card-hover group">
+            <div class="flex text-[#FF3C3C] mb-6">
+              <iconify-icon icon="solar:star-bold" class="text-lg"></iconify-icon>
+              <iconify-icon icon="solar:star-bold" class="text-lg"></iconify-icon>
+              <iconify-icon icon="solar:star-bold" class="text-lg"></iconify-icon>
+              <iconify-icon icon="solar:star-bold" class="text-lg"></iconify-icon>
+              <iconify-icon icon="solar:star-bold" class="text-lg"></iconify-icon>
+            </div>
+            <p class="text-[15px] text-[#B0B0B0] mb-8 font-light leading-relaxed flex-grow">
+              "Llevé mi vehículo para reparar un golpe y el resultado fue de
+              primera. Muy responsables, comunicación clara y un acabado
+              profesional."
+            </p>
+            <div class="mt-auto pt-6 border-t border-[#2A2E34]/50">
+              <p class="text-base font-medium">María R.</p>
+              <p class="text-sm text-[#B0B0B0]">
+                Cliente de reparación de choques
+              </p>
+            </div>
+          </div>
+          <!-- Testimonial 3 -->
+          <div class="w-[86vw] sm:w-[400px] md:w-auto flex-shrink-0 snap-center md:snap-align-none bg-[#1A1D21] border border-[#2A2E34] p-8 rounded-2xl flex flex-col h-full reveal-testimonial-card testimonial-card-hover group">
+            <div class="flex text-[#FF3C3C] mb-6">
+              <iconify-icon icon="solar:star-bold" class="text-lg"></iconify-icon>
+              <iconify-icon icon="solar:star-bold" class="text-lg"></iconify-icon>
+              <iconify-icon icon="solar:star-bold" class="text-lg"></iconify-icon>
+              <iconify-icon icon="solar:star-bold" class="text-lg"></iconify-icon>
+              <iconify-icon icon="solar:star-bold" class="text-lg"></iconify-icon>
+            </div>
+            <p class="text-[15px] text-[#B0B0B0] mb-8 font-light leading-relaxed flex-grow">
+              "Quedé bien satisfecho con el trabajo. Me restauraron varias
+              piezas, pintaron los aros y el carro se ve como nuevo. Full
+              recomendados."
+            </p>
+            <div class="mt-auto pt-6 border-t border-[#2A2E34]/50">
+              <p class="text-base font-medium">José L.</p>
+              <p class="text-sm text-[#B0B0B0]">
+                Cliente de restauración y pintura de aros
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center justify-center gap-3 mt-4 md:hidden" id="testimonials-pagination">
+          <button class="w-2.5 h-2.5 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#FF3C3C]/50 bg-[#FF3C3C]" aria-label="Ver reseña 1"></button>
+          <button class="w-2.5 h-2.5 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#B0B0B0]/50 bg-[#2A2E34] hover:bg-[#B0B0B0]" aria-label="Ver reseña 2"></button>
+          <button class="w-2.5 h-2.5 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#B0B0B0]/50 bg-[#2A2E34] hover:bg-[#B0B0B0]" aria-label="Ver reseña 3"></button>
+        </div>
+      </div>
+    </section>
+    <section class="py-24 bg-[#0D0D0D] border-t border-[#2A2E34]" id="galeria">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-16 gsap-fade-up">
+          <span class="text-[#FF3C3C] text-sm font-medium tracking-widest uppercase mb-2 block">
+            Portafolio
+          </span>
+          <h2 class="text-4xl md:text-5xl font-['Montserrat'] font-semibold tracking-tight mb-4">
+            Trabajos Realizados
+          </h2>
+          <p class="text-[#B0B0B0] max-w-2xl mx-auto font-light">
+            Desliza para comparar el antes y después de algunos de nuestros
+            trabajos.
+          </p>
+        </div>
+        <p class="ba-instruction">
+          <iconify-icon icon="solar:arrow-left-right-linear" class="text-lg"></iconify-icon>
+          Desliza el centro para comparar
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 gap-x-6 gap-y-6 items-start" id="ba-gallery">
+          <article class="completed-project reveal-ba-card">
+            <div class="before-after" data-before-after="" style="--position: 50%;">
+              <!-- REPLACE WITH AFTER IMAGE FOR PROJECT 1 -->
+              <img class="before-after__image before-after__image--after" src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/38ce4969-46c7-49b3-a09d-ed603729e67d_800w.png" alt="Vehículo después de la reparación de choque" loading="lazy" decoding="async">
+              <div class="before-after__before">
+                <div class="before-after__before-inner" style="width: 344px;">
+                  <!-- REPLACE WITH BEFORE IMAGE FOR PROJECT 1 -->
+                  <img class="before-after__image before-after__image--before" src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/710f37bb-83fa-4c6f-961c-f4b783dffd79_800w.png" alt="Vehículo antes de la reparación de choque" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <span class="before-after__label before-after__label--before">
+                Antes
+              </span>
+              <span class="before-after__label before-after__label--after">
+                Después
+              </span>
+              <input class="before-after__range" type="range" min="0" max="100" value="50" aria-label="Comparar antes y después del proyecto de reparación de choque">
+              <div class="before-after__divider" aria-hidden="true">
+                <span class="before-after__handle">
+                  <span>←</span>
+                  <span>→</span>
+                </span>
+              </div>
+            </div>
+            <div class="completed-project__info">
+              <h3 class="">Hyundai Venue</h3>
+            </div>
+          </article>
+          <article class="completed-project reveal-ba-card">
+            <div class="before-after before-after--portrait" data-before-after="" style="--position: 50%;">
+              <!-- REPLACE WITH AFTER IMAGE FOR PROJECT 2 -->
+              <img class="before-after__image before-after__image--after" src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/a46cf048-8cfd-42d9-9d61-ffe9a991aed5_800w.jpg" alt="Vehículo después de hojalatería y pintura" loading="lazy" decoding="async">
+              <div class="before-after__before">
+                <div class="before-after__before-inner" style="width: 344px;">
+                  <!-- REPLACE WITH BEFORE IMAGE FOR PROJECT 2 -->
+                  <img class="before-after__image before-after__image--before" src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/dcec5044-19e6-49a8-a9b0-4837a01fc2b5_800w.jpg" alt="Vehículo antes de hojalatería y pintura" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <span class="before-after__label before-after__label--before">
+                Antes
+              </span>
+              <span class="before-after__label before-after__label--after">
+                Después
+              </span>
+              <input class="before-after__range" type="range" min="0" max="100" value="50" aria-label="Comparar antes y después del proyecto de hojalatería y pintura">
+              <div class="before-after__divider" aria-hidden="true">
+                <span class="before-after__handle">
+                  <span>←</span>
+                  <span>→</span>
+                </span>
+              </div>
+            </div>
+            <div class="completed-project__info">
+              <h3 class="">Toyota Camry</h3>
+            </div>
+          </article>
+          <article class="completed-project reveal-ba-card">
+            <div class="before-after" data-before-after="" style="--position:50%;">
+              <!-- REPLACE WITH AFTER IMAGE FOR PROJECT 3 -->
+              <img class="before-after__image before-after__image--after" src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/7674e577-8f03-4fb4-8fa0-1523c7e3f727_800w.jpg" alt="Vehículo después del pulido y sellado" loading="lazy" decoding="async">
+              <div class="before-after__before">
+                <div class="before-after__before-inner" style="width: 344px;">
+                  <!-- REPLACE WITH BEFORE IMAGE FOR PROJECT 3 -->
+                  <img class="before-after__image before-after__image--before" src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/e0197a21-558a-4697-b132-8ab35dd39b60_800w.jpg" alt="Vehículo antes del pulido y sellado" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <span class="before-after__label before-after__label--before">
+                Antes
+              </span>
+              <span class="before-after__label before-after__label--after">
+                Después
+              </span>
+              <input class="before-after__range" type="range" min="0" max="100" value="50" aria-label="Comparar antes y después del proyecto de pulido y sellado">
+              <div class="before-after__divider" aria-hidden="true">
+                <span class="before-after__handle">
+                  <span>←</span>
+                  <span>→</span>
+                </span>
+              </div>
+            </div>
+            <div class="completed-project__info"><h3 class="">Rav4</h3></div>
+          </article>
+        </div>
+      </div>
+    </section>
+    <section id="contacto" class="py-32 bg-[#1A1D21] relative border-t border-[#2A2E34] overflow-hidden">
+      <div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-[#FF3C3C]/30 to-transparent blur-[100px] rounded-full"></div>
+      </div>
+      <div class="max-w-7xl mx-auto px-6 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          <div class="gsap-fade-up">
+            <h2 class="text-4xl md:text-5xl font-['Montserrat'] font-semibold tracking-tight mb-4">
+              Solicita una Cotización
+            </h2>
+            <p class="text-[#B0B0B0] font-light mb-8">
+              Envíanos los detalles de tu vehículo y te contactaremos lo antes
+              posible.
+            </p>
+            <form id="home-quote-form" action="https://formsubmit.co/ajax/Agmcustompaints@gmail.com" method="POST" novalidate="" class="space-y-4 relative">
+              <input type="hidden" name="_subject" value="Nueva solicitud desde el homepage — AGM Custom Paint’s">
+              <input type="hidden" name="_template" value="table">
+              <input type="hidden" name="_captcha" value="false">
+              <input type="text" name="_honey" tabindex="-1" autocomplete="off" class="home-form-honeypot" aria-hidden="true">
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="">
+                  <label for="home-nombre" class="sr-only">
+                    Nombre completo
+                  </label>
+                  <input id="home-nombre" type="text" name="nombre" placeholder="Nombre completo" required="" autocomplete="name" class="w-full bg-[#0D0D0D] border border-[#2A2E34] rounded-lg px-4 py-3 text-[#FFFFFF] placeholder-[#4A4E54] focus:outline-none focus:border-[#FF3C3C] transition-colors">
+                  <p id="home-nombre-error" class="text-[#FF3C3C] text-xs mt-1 hidden">
+                    Escribe tu nombre completo.
+                  </p>
+                </div>
+                <div class="">
+                  <label for="home-telefono" class="sr-only">Teléfono</label>
+                  <input id="home-telefono" type="tel" name="telefono" placeholder="Teléfono" required="" autocomplete="tel" inputmode="tel" class="w-full bg-[#0D0D0D] border border-[#2A2E34] rounded-lg px-4 py-3 text-[#FFFFFF] placeholder-[#4A4E54] focus:outline-none focus:border-[#FF3C3C] transition-colors">
+                  <p id="home-telefono-error" class="text-[#FF3C3C] text-xs mt-1 hidden">
+                    Escribe un número de teléfono válido.
+                  </p>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="">
+                  <label for="home-email" class="sr-only">
+                    Email (Opcional)
+                  </label>
+                  <input id="home-email" type="email" name="email" placeholder="Email (Opcional)" autocomplete="email" inputmode="email" class="w-full bg-[#0D0D0D] border border-[#2A2E34] rounded-lg px-4 py-3 text-[#FFFFFF] placeholder-[#4A4E54] focus:outline-none focus:border-[#FF3C3C] transition-colors">
+                  <p id="home-email-error" class="text-[#FF3C3C] text-xs mt-1 hidden">
+                    Escribe un correo electrónico válido o deja este campo
+                    vacío.
+                  </p>
+                </div>
+                <div class="">
+                  <label for="home-vehiculo" class="sr-only">
+                    Marca y modelo del vehículo
+                  </label>
+                  <input id="home-vehiculo" type="text" name="vehiculo" placeholder="Marca y modelo del vehículo" required="" class="w-full bg-[#0D0D0D] border border-[#2A2E34] rounded-lg px-4 py-3 text-[#FFFFFF] placeholder-[#4A4E54] focus:outline-none focus:border-[#FF3C3C] transition-colors">
+                  <p id="home-vehiculo-error" class="text-[#FF3C3C] text-xs mt-1 hidden">
+                    Indica la marca y el modelo de tu vehículo.
+                  </p>
+                </div>
+              </div>
+              <div class="">
+                <label for="home-servicio" class="sr-only">
+                  Servicio que necesita
+                </label>
+                <select id="home-servicio" name="servicio" required="" class="w-full bg-[#0D0D0D] border border-[#2A2E34] rounded-lg px-4 py-3 text-[#FFFFFF] focus:outline-none focus:border-[#FF3C3C] transition-colors appearance-none">
+                  <option value="" disabled="" selected="" class="text-[#4A4E54]">
+                    Selecciona un servicio
+                  </option>
+                  <option value="Reparación de Hojalatería">
+                    Reparación de Hojalatería
+                  </option>
+                  <option value="Reparación de Choques">
+                    Reparación de Choques
+                  </option>
+                  <option value="Pintura Automotriz">Pintura Automotriz</option>
+                  <option value="Pulido y Sellado">Pulido y Sellado</option>
+                  <option value="Restauración de Autos Clásicos">
+                    Restauración de Autos Clásicos
+                  </option>
+                  <option value="Pintura de Aros">Pintura de Aros</option>
+                  <option value="Otro">Otro</option>
+                </select>
+                <p id="home-servicio-error" class="text-[#FF3C3C] text-xs mt-1 hidden">
+                  Selecciona el servicio que necesitas.
+                </p>
+              </div>
+              <div class="">
+                <label for="home-mensaje" class="sr-only">
+                  Mensaje / Detalles del trabajo
+                </label>
+                <textarea id="home-mensaje" name="mensaje" rows="4" placeholder="Mensaje / Detalles del trabajo" required="" class="w-full bg-[#0D0D0D] border border-[#2A2E34] rounded-lg px-4 py-3 text-[#FFFFFF] placeholder-[#4A4E54] focus:outline-none focus:border-[#FF3C3C] transition-colors resize-none"></textarea>
+                <p id="home-mensaje-error" class="text-[#FF3C3C] text-xs mt-1 hidden">
+                  Describe brevemente el trabajo que necesitas.
+                </p>
+              </div>
+
+              <div id="home-form-status" class="home-form-status outline-none focus:outline-none" role="status" aria-live="polite" aria-atomic="true" tabindex="-1"></div>
+
+              <button id="home-submit-btn" type="submit" class="w-full px-8 py-4 bg-[#FF3C3C] text-[#FFFFFF] font-medium text-sm rounded-none hover:bg-[#C62828] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed">
+                Enviar Solicitud
+              </button>
+
+              <p class="text-xs text-[#B0B0B0] text-center mt-4">
+                Para una respuesta más rápida,
+                <a href="https://wa.me/17875564310?text=Hola%20AGM%20Custom%20Paint%E2%80%99s%2C%20me%20gustar%C3%ADa%20solicitar%20una%20cotizaci%C3%B3n%20para%20mi%20veh%C3%ADculo." target="_blank" class="text-[#25D366] hover:underline focus:outline-none focus:ring-1 focus:ring-[#25D366]">
+                  escríbenos por WhatsApp
+                </a>
+                .
+              </p>
+            </form>
+          </div>
+          <div class="gsap-fade-up bg-[#0D0D0D]/50 border border-[#2A2E34] rounded-2xl p-8 backdrop-blur flex flex-col justify-between">
+            <div class="">
+              <h3 class="text-2xl font-['Montserrat'] font-semibold mb-8 tracking-tight">
+                Información de Contacto
+              </h3>
+              <div class="space-y-6">
+                <div class="flex items-start gap-4">
+                  <iconify-icon icon="solar:map-point-linear" class="text-2xl text-[#FF3C3C] flex-shrink-0 mt-1"></iconify-icon>
+                  <div class="">
+                    <p class="font-medium mb-1">Ubicación</p>
+                    <p class="text-sm text-[#B0B0B0] font-light leading-relaxed">
+                      Comunidad La Dolores, 26 Calle Jericó
+                      <br>
+                      Río Grande, PR 00745
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-4">
+                  <iconify-icon icon="solar:clock-circle-linear" class="text-2xl text-[#FF3C3C] flex-shrink-0 mt-1"></iconify-icon>
+                  <div class="">
+                    <p class="font-medium mb-1">Horario</p>
+                    <p class="text-sm text-[#B0B0B0] font-light leading-relaxed">
+                      Lunes a Sábado
+                      <br>
+                      8:00 AM – 5:00 PM
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-4">
+                  <iconify-icon icon="solar:phone-linear" class="text-2xl text-[#FF3C3C] flex-shrink-0 mt-1"></iconify-icon>
+                  <div class="">
+                    <p class="font-medium mb-1">Teléfono &amp; WhatsApp</p>
+                    <p class="text-sm text-[#B0B0B0] font-light leading-relaxed">
+                      <a href="tel:+17875564310" class="hover:text-[#FFFFFF] transition-colors">
+                        (787) 556-4310
+                      </a>
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-4">
+                  <iconify-icon icon="solar:letter-linear" class="text-2xl text-[#FF3C3C] flex-shrink-0 mt-1"></iconify-icon>
+                  <div class="">
+                    <p class="font-medium mb-1">Email</p>
+                    <p class="text-sm text-[#B0B0B0] font-light leading-relaxed">
+                      <a href="mailto:Agmcustompaints@gmail.com" class="hover:text-[#FFFFFF] transition-colors">
+                        Agmcustompaints@gmail.com
+                      </a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <a href="https://www.google.com/maps/search/?api=1&amp;query=Comunidad+La+Dolores,+26+Calle+Jeric%C3%B3,+R%C3%ADo+Grande,+PR+00745" target="_blank" class="mt-8 aspect-[2/1] bg-[#1A1D21] border border-[#2A2E34] rounded-xl flex items-center justify-center overflow-hidden relative group hover:border-[#FF3C3C]/50 transition-colors cursor-pointer">
+              <div class="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-70 transition-all duration-500 grayscale group-hover:grayscale-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?w=1600&amp;q=80')]"></div>
+              <div class="relative z-10 flex items-center gap-2 text-sm font-medium text-[#FFFFFF] border border-[#2A2E34] group-hover:border-[#FF3C3C] bg-[#0D0D0D]/90 px-6 py-3 rounded transition-all duration-300 group-hover:bg-[#FF3C3C]">
+                <iconify-icon icon="solar:map-point-bold" class="text-lg"></iconify-icon>
+                Abrir en Google Maps
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. Final CTA -->
+    <section class="py-32 bg-[#1A1D21] relative border-t border-[#2A2E34] overflow-hidden">
+      <div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-[#FF3C3C]/30 to-transparent blur-[100px] rounded-full"></div>
+      </div>
+      <div class="max-w-4xl mx-auto px-6 text-center relative z-10 gsap-fade-up">
+        <h2 class="text-5xl md:text-7xl font-['Montserrat'] font-semibold tracking-tight mb-6">
+          ¿Listo para Devolverle a tu Vehículo
+          <br class="hidden md:block">
+          su Mejor Apariencia?
+        </h2>
+        <p class="text-lg text-[#B0B0B0] mb-10 font-light max-w-2xl mx-auto">
+          Comunícate con AGM Custom Paint’s y solicita una cotización para tu
+          próximo trabajo de hojalatería, pintura, reparación o restauración.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="contacto.html" class="w-full sm:w-auto px-8 py-4 bg-[#FFFFFF] text-[#0D0D0D] font-medium text-sm hover:bg-[#B0B0B0] transition-colors duration-300">
+            Solicitar Cotización
+          </a>
+          <a href="tel:+17875564310" class="w-full sm:w-auto px-8 py-4 bg-transparent border border-[#2A2E34] text-[#FFFFFF] font-medium text-sm hover:border-[#FFFFFF] transition-colors duration-300 flex items-center justify-center gap-2">
+            <iconify-icon icon="solar:phone-linear" stroke-width="1.5" class="text-lg"></iconify-icon>
+            Llamar Ahora
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#0D0D0D] border-t border-[#2A2E34] pt-20 pb-10">
+      <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
+        <div class="col-span-1">
+          <a href="#" class="font-['Montserrat'] font-semibold tracking-tighter text-2xl uppercase tracking-[0.2em] mb-4 block">
+            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/3871496e-39e1-4585-8640-6ddf47904d4d_800w.png" alt="AGM Custom Paint's logo" class="h-20 md:h-28 w-auto drop-shadow-md">
+          </a>
+          <p class="text-xs text-[#B0B0B0] font-light leading-relaxed max-w-xs mb-4">
+            #AhiNoPasoNada
+            <br>
+            Hojalatería y pintura automotriz en Puerto Rico.
+          </p>
+        </div>
+        <div class="">
+          <h4 class="text-sm font-['Montserrat'] font-medium mb-6 uppercase tracking-wider">
+            Enlaces
+          </h4>
+          <ul class="space-y-3 text-sm text-[#B0B0B0] font-light">
+            <li class="">
+              <a href="#servicios" class="hover:text-[#FFFFFF] transition-colors">
+                Servicios
+              </a>
+            </li>
+            <li class="">
+              <a href="#galeria" class="hover:text-[#FFFFFF] transition-colors">
+                Trabajos Realizados
+              </a>
+            </li>
+            <li class="">
+              <a href="#contacto" class="hover:text-[#FFFFFF] transition-colors">
+                Solicitar Cotización
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="">
+          <h4 class="text-sm font-['Montserrat'] font-medium mb-6 uppercase tracking-wider">
+            Contacto
+          </h4>
+          <ul class="space-y-3 text-sm text-[#B0B0B0] font-light">
+            <li class="">
+              <a href="tel:+17875564310" class="hover:text-[#FFFFFF] transition-colors">
+                (787) 556-4310
+              </a>
+            </li>
+            <li class="">
+              <a href="mailto:Agmcustompaints@gmail.com" class="hover:text-[#FFFFFF] transition-colors">
+                Agmcustompaints@gmail.com
+              </a>
+            </li>
+            <li class="">
+              Comunidad La Dolores, 26 Calle Jericó, Río Grande, PR
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="max-w-7xl mx-auto px-6 pt-8 border-t border-[#2A2E34] flex flex-col md:flex-row justify-between items-center gap-4">
+        <p class="text-xs text-[#B0B0B0] font-light">
+          © 2024 AGM Custom Paint's. Todos los derechos reservados.
+        </p>
+        <div class="flex gap-4">
+          <a href="https://www.instagram.com/Agmcustompaints" target="_blank" class="text-[#B0B0B0] hover:text-[#FFFFFF] transition-colors">
+            <iconify-icon icon="mdi:instagram" class="text-xl"></iconify-icon>
+          </a>
+          <a href="https://www.facebook.com/Agmcustompaints" class="text-[#B0B0B0] hover:text-[#FFFFFF] transition-colors">
+            <iconify-icon icon="mdi:facebook" class="text-xl" width="20" height="20" style="color: rgb(255, 255, 255);"></iconify-icon>
+          </a>
+        </div>
+      </div>
+    </footer>
+    <script>
+      (function () {
+        document.querySelectorAll('[data-before-after]').forEach(function (comparison) {
+          const range = comparison.querySelector('.before-after__range');
+          const inner = comparison.querySelector('.before-after__before-inner');
+
+          if (!range) return;
+
+          let dragging = false;
+
+          function updatePosition(value) {
+            const position = Math.max(0, Math.min(100, Number(value)));
+
+            range.value = position;
+            comparison.style.setProperty('--position', position + '%');
+
+            if (inner) {
+              inner.style.width =
+                comparison.getBoundingClientRect().width + 'px';
+            }
+          }
+
+          function updateFromPointer(event) {
+            const rectangle = comparison.getBoundingClientRect();
+
+            const position =
+              ((event.clientX - rectangle.left) / rectangle.width) * 100;
+
+            updatePosition(position);
+          }
+
+          comparison.addEventListener('pointerdown', function (event) {
+          event.preventDefault();
+          dragging = true;
+
+          comparison.setPointerCapture(event.pointerId);
+          updateFromPointer(event);
+          });
+
+          comparison.addEventListener('pointermove', function (event) {
+            if (!dragging) return;
+
+            updateFromPointer(event);
+          });
+
+          comparison.addEventListener('pointerup', function (event) {
+            dragging = false;
+
+            if (comparison.hasPointerCapture(event.pointerId)) {
+              comparison.releasePointerCapture(event.pointerId);
+            }
+          });
+
+          comparison.addEventListener('pointercancel', function (event) {
+            dragging = false;
+
+            if (comparison.hasPointerCapture(event.pointerId)) {
+              comparison.releasePointerCapture(event.pointerId);
+            }
+          });
+
+          range.addEventListener('input', function () {
+            updatePosition(range.value);
+          });
+
+          window.addEventListener('resize', function () {
+            updatePosition(range.value);
+          });
+
+          updatePosition(range.value);
+        });
+
+        const gallery = document.getElementById('ba-gallery');
+
+        if (gallery && 'IntersectionObserver' in window) {
+          const observer = new IntersectionObserver(
+            function (entries, currentObserver) {
+              entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                  gallery.classList.add('ba-active');
+                  currentObserver.unobserve(gallery);
+                }
+              });
+            },
+            {
+              threshold: 0.15,
+              rootMargin: '0px 0px -8% 0px'
+            }
+          );
+
+          observer.observe(gallery);
+        } else if (gallery) {
+          gallery.classList.add('ba-active');
+        }
+      })();
+    </script>
+
+    <!-- Floating WhatsApp CTA -->
+    <a href="https://wa.me/17875564310?text=Hola%20AGM%20Custom%20Paint%E2%80%99s%2C%20me%20gustar%C3%ADa%20solicitar%20una%20cotizaci%C3%B3n%20para%20mi%20veh%C3%ADculo." class="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 w-12 h-12 md:w-14 md:h-14 bg-[#25D366] text-white rounded-full shadow-[0_0_20px_rgba(37,211,102,0.3)] flex items-center justify-center hover:scale-110 transition-transform duration-300 group">
+      <iconify-icon icon="solar:phone-calling-linear" stroke-width="1.5" class="text-xl md:text-2xl group-hover:animate-pulse"></iconify-icon>
+    </a>
+
+    <!-- Scripts -->
+    <script>
+      // Initialize Lenis Smooth Scroll
+      const lenis = new Lenis({
+          duration: 1.2,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          direction: 'vertical',
+          gestureDirection: 'vertical',
+          smooth: true,
+          mouseMultiplier: 1,
+          smoothTouch: false,
+          touchMultiplier: 2,
+          infinite: false,
+      });
+
+      // Integrate Lenis with GSAP ScrollTrigger
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add((time) => {
+          lenis.raf(time * 1000);
+      });
+      gsap.ticker.lagSmoothing(0);
+
+      // Navbar blur on scroll
+      const navbar = document.getElementById('navbar');
+      window.addEventListener('scroll', () => {
+          if (window.scrollY > 50) {
+              navbar.classList.add('bg-[#0D0D0D]/90');
+              navbar.classList.remove('bg-[#0D0D0D]/70');
+          } else {
+              navbar.classList.add('bg-[#0D0D0D]/70');
+              navbar.classList.remove('bg-[#0D0D0D]/90');
+          }
+      });
+
+      // GSAP Animations
+      document.addEventListener("DOMContentLoaded", (event) => {
+          gsap.registerPlugin(ScrollTrigger);
+
+          // Hero Animation
+          const heroTl = gsap.timeline();
+
+          // Set initial state
+          gsap.set(".hero-text", { y: 100, opacity: 0, visibility: "visible" });
+
+          heroTl.to(".hero-text", {
+              y: 0,
+              opacity: 1,
+              duration: 1.2,
+              stagger: 0.15,
+              ease: "power4.out",
+              delay: 0.2
+          })
+          .to("#hero-img", {
+              scale: 1,
+              duration: 2,
+              ease: "power2.out"
+          }, "-=1.2");
+
+          // Hero Image Parallax
+          gsap.to("#hero-img", {
+              yPercent: 30,
+              ease: "none",
+              scrollTrigger: {
+                  trigger: "section",
+                  start: "top top",
+                  end: "bottom top",
+                  scrub: true
+              }
+          });
+
+          // Fade Up Elements on Scroll
+          const fadeUpElements = gsap.utils.toArray('.gsap-fade-up');
+          fadeUpElements.forEach(elem => {
+              gsap.set(elem, { visibility: "visible" }); // Make visible before animation starts
+              gsap.from(elem, {
+                  scrollTrigger: {
+                      trigger: elem,
+                      start: "top 85%",
+                      toggleActions: "play none none none"
+                  },
+                  y: 40,
+                  opacity: 0,
+                  duration: 1,
+                  ease: "power3.out"
+              });
+          });
+      });
+    </script>
+
+    <script>
+      document.documentElement.classList.add('js-enabled');
+      document.addEventListener('DOMContentLoaded', () => {
+        const section = document.querySelector('.js-reveal-section');
+        if (!section) return;
+        const observer = new IntersectionObserver((entries, obs) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              section.classList.add('reveal-active');
+              obs.unobserve(section);
+            }
+          });
+        }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+        observer.observe(section);
+      });
+    </script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const benefitsSection = document.getElementById('benefits-section');
+        if (!benefitsSection) return;
+        const observer = new IntersectionObserver((entries, obs) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              benefitsSection.classList.add('benefits-active');
+              obs.unobserve(benefitsSection);
+            }
+          });
+        }, { threshold: 0.2, rootMargin: '0px 0px -8% 0px' });
+        observer.observe(benefitsSection);
+      });
+    </script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const processSection = document.querySelector('.js-process-section');
+        if (!processSection) return;
+        const observer = new IntersectionObserver((entries, obs) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              processSection.classList.add('process-active');
+              obs.unobserve(processSection);
+            }
+          });
+        }, { threshold: 0.18, rootMargin: '0px 0px -8% 0px' });
+        observer.observe(processSection);
+      });
+    </script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const section = document.querySelector('.js-testimonials-section');
+        if (!section) return;
+        const observer = new IntersectionObserver((entries, obs) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              section.classList.add('testimonials-active');
+              obs.unobserve(section);
+            }
+          });
+        }, { threshold: 0.2, rootMargin: '0px 0px -5% 0px' });
+        observer.observe(section);
+      });
+    </script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const carousel = document.getElementById('testimonials-carousel');
+        const dots = document.querySelectorAll('#testimonials-pagination button');
+        if (!carousel || dots.length === 0) return;
+        const cards = carousel.querySelectorAll('.reveal-testimonial-card');
+        if (cards.length === 0) return;
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const index = Array.from(cards).indexOf(entry.target);
+              if (index > -1) {
+                dots.forEach((dot, i) => {
+                  if (i === index) {
+                    dot.classList.remove('bg-[#2A2E34]', 'hover:bg-[#B0B0B0]');
+                    dot.classList.add('bg-[#FF3C3C]');
+                  } else {
+                    dot.classList.remove('bg-[#FF3C3C]');
+                    dot.classList.add('bg-[#2A2E34]', 'hover:bg-[#B0B0B0]');
+                  }
+                });
+              }
+            }
+          });
+        }, {
+          root: carousel,
+          threshold: 0.6
+        });
+
+        cards.forEach(card => observer.observe(card));
+
+        dots.forEach((dot, i) => {
+          dot.addEventListener('click', () => {
+            cards[i].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          });
+        });
+      });
+    </script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const carousel = document.getElementById('services-carousel');
+        const dots = document.querySelectorAll('#services-pagination button');
+        if (!carousel || dots.length === 0) return;
+        const cards = carousel.querySelectorAll('.reveal-card');
+        if (cards.length === 0) return;
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const index = Array.from(cards).indexOf(entry.target);
+              if (index > -1) {
+                dots.forEach((dot, i) => {
+                  if (i === index) {
+                    dot.classList.remove('bg-[#2A2E34]', 'hover:bg-[#B0B0B0]');
+                    dot.classList.add('bg-[#FF3C3C]');
+                  } else {
+                    dot.classList.remove('bg-[#FF3C3C]');
+                    dot.classList.add('bg-[#2A2E34]', 'hover:bg-[#B0B0B0]');
+                  }
+                });
+              }
+            }
+          });
+        }, {
+          root: carousel,
+          threshold: 0.6
+        });
+
+        cards.forEach(card => observer.observe(card));
+
+        dots.forEach((dot, i) => {
+          dot.addEventListener('click', () => {
+            cards[i].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          });
+        });
+      });
+    </script>
+
+    <script data-aura-video-controller="true">
+      (function () {
+        function playVideo(video) {
+          var promise = video.play();
+          if (promise && typeof promise.catch === "function") {
+            promise.catch(function () {});
+          }
+        }
+
+        function setupVideo(video) {
+          if (video.__auraVideoReady === true) return;
+          video.__auraVideoReady = true;
+          video.removeAttribute("data-aura-video-ready");
+          video.removeAttribute("data-aura-video-played");
+          video.muted = true;
+          video.playsInline = true;
+
+          var preset = video.dataset.auraVideoPreset || "loop-in-view";
+          if (preset === "hover") {
+            video.addEventListener("mouseenter", function () {
+              playVideo(video);
+            });
+            video.addEventListener("mouseleave", function () {
+              video.pause();
+              video.currentTime = 0;
+            });
+            return;
+          }
+
+          if (!("IntersectionObserver" in window)) {
+            playVideo(video);
+            return;
+          }
+
+          var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                if (preset === "play-once" && video.__auraVideoPlayed === true) {
+                  return;
+                }
+                playVideo(video);
+              } else {
+                video.pause();
+              }
+            });
+          }, { threshold: 0.35 });
+
+          if (preset === "play-once") {
+            video.addEventListener("ended", function () {
+              video.__auraVideoPlayed = true;
+            }, { once: true });
+          }
+
+          observer.observe(video);
+        }
+
+        function setupVideos() {
+          document
+            .querySelectorAll("video[data-aura-video-preset]")
+            .forEach(setupVideo);
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", setupVideos);
+        } else {
+          setupVideos();
+        }
+      })();
+    </script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const openBtn = document.getElementById('mobile-menu-btn');
+        const closeBtn = document.getElementById('close-menu-btn');
+        const overlay = document.getElementById('mobile-menu-overlay');
+        const panel = document.getElementById('mobile-menu');
+        const links = document.querySelectorAll('.mobile-nav-link');
+
+        if (!openBtn || !closeBtn || !overlay || !panel) return;
+
+        function openMenu() {
+          openBtn.setAttribute('aria-expanded', 'true');
+          panel.setAttribute('aria-hidden', 'false');
+
+          overlay.classList.remove('opacity-0', 'pointer-events-none');
+          overlay.classList.add('opacity-100', 'pointer-events-auto');
+
+          panel.classList.remove('translate-x-full');
+          panel.classList.add('translate-x-0');
+
+          document.body.style.overflow = 'hidden';
+
+          setTimeout(() => {
+            closeBtn.focus();
+          }, 100);
+        }
+
+        function closeMenu() {
+          openBtn.setAttribute('aria-expanded', 'false');
+          panel.setAttribute('aria-hidden', 'true');
+
+          overlay.classList.remove('opacity-100', 'pointer-events-auto');
+          overlay.classList.add('opacity-0', 'pointer-events-none');
+
+          panel.classList.remove('translate-x-0');
+          panel.classList.add('translate-x-full');
+
+          document.body.style.overflow = '';
+          openBtn.focus();
+        }
+
+        openBtn.addEventListener('click', openMenu);
+        closeBtn.addEventListener('click', closeMenu);
+        overlay.addEventListener('click', closeMenu);
+
+        links.forEach(link => {
+          link.addEventListener('click', closeMenu);
+        });
+
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && panel.getAttribute('aria-hidden') === 'false') {
+            closeMenu();
+          }
+        });
+
+        window.addEventListener('resize', () => {
+          if (window.innerWidth > 767 && panel.getAttribute('aria-hidden') === 'false') {
+            closeMenu();
+          }
+        });
+      });
+    </script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+          anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            if (href !== '#' && !href.startsWith('#/')) {
+              const target = document.querySelector(href);
+              if (target && typeof lenis !== 'undefined') {
+                e.preventDefault();
+                lenis.scrollTo(target, { offset: -80 });
+              }
+            }
+          });
+        });
+      });
+    </script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('home-quote-form');
+        if (!form) return;
+
+        const submitBtn = document.getElementById('home-submit-btn');
+        const statusContainer = document.getElementById('home-form-status');
+
+        const showError = (id, show) => {
+          const el = document.getElementById(id);
+          const err = document.getElementById(id + '-error');
+          if(!el) return;
+          if (show) {
+            el.classList.add('border-[#FF3C3C]');
+            el.classList.remove('border-[#2A2E34]');
+            if(err) err.classList.remove('hidden');
+          } else {
+            el.classList.remove('border-[#FF3C3C]');
+            el.classList.add('border-[#2A2E34]');
+            if(err) err.classList.add('hidden');
+          }
+        };
+
+        form.querySelectorAll('input, select, textarea').forEach(input => {
+          input.addEventListener('input', () => showError(input.id, false));
+          input.addEventListener('change', () => showError(input.id, false));
+        });
+
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          let isValid = true;
+
+          const nombre = form.nombre.value.trim();
+          if(!nombre) { showError('home-nombre', true); isValid = false; }
+
+          const telefono = form.telefono.value.trim();
+          const phoneDigits = telefono.replace(/\D/g, '').length;
+          if(phoneDigits < 7) { showError('home-telefono', true); isValid = false; }
+
+          const email = form.email.value.trim();
+          if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('home-email', true); isValid = false; }
+
+          const vehiculo = form.vehiculo.value.trim();
+          if(!vehiculo) { showError('home-vehiculo', true); isValid = false; }
+
+          const servicio = form.servicio.value;
+          if(!servicio) { showError('home-servicio', true); isValid = false; }
+
+          const mensaje = form.mensaje.value.trim();
+          if(!mensaje) { showError('home-mensaje', true); isValid = false; }
+
+          if (!isValid) return;
+
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Enviando...';
+          form.setAttribute('aria-busy', 'true');
+          statusContainer.innerHTML = '';
+
+          try {
+            const formData = new FormData(form);
+            const response = await fetch(form.action, {
+              method: 'POST',
+              body: formData,
+              headers: { 'Accept': 'application/json' }
+            });
+
+            if (response.ok) {
+              form.reset();
+              statusContainer.innerHTML = '<div class="bg-[#1A1D21] border border-[#25D366] rounded-xl p-6 text-center status-animate mb-4 outline-none"><iconify-icon icon="solar:check-circle-bold" class="text-4xl text-[#25D366] mb-3"></iconify-icon><h4 class="text-[#FFFFFF] text-lg font-[\'Montserrat\'] font-semibold mb-2">¡Solicitud enviada correctamente!</h4><p class="text-sm text-[#B0B0B0] font-light mb-4">Gracias por comunicarte con AGM Custom Paint’s. Recibimos los detalles de tu vehículo y nos estaremos comunicando contigo lo antes posible.</p><p class="text-xs text-[#B0B0B0] mb-4">Para una respuesta más rápida, también puedes enviarnos fotos por WhatsApp.</p><a href="https://wa.me/17875564310?text=Hola%20AGM%20Custom%20Paint%E2%80%99s%2C%20acabo%20de%20enviar%20una%20solicitud%20desde%20la%20p%C3%A1gina%20principal%20y%20quiero%20compartir%20fotos%20de%20mi%20veh%C3%ADculo." target="_blank" class="inline-flex items-center justify-center w-full px-6 py-3 bg-[#25D366] text-[#FFFFFF] font-medium text-sm rounded hover:bg-[#1EAE53] transition-colors focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2 focus:ring-offset-[#1A1D21] min-h-[48px]"><iconify-icon icon="solar:gallery-send-linear" class="mr-2 text-xl"></iconify-icon> Enviar Fotos por WhatsApp</a></div>';
+              statusContainer.focus();
+              if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                statusContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            } else {
+              throw new Error('Network response was not ok.');
+            }
+          } catch (error) {
+            statusContainer.innerHTML = '<div class="bg-[#1A1D21] border border-[#FF3C3C] rounded-xl p-6 text-center status-animate mb-4 outline-none"><iconify-icon icon="solar:danger-triangle-bold" class="text-4xl text-[#FF3C3C] mb-3"></iconify-icon><h4 class="text-[#FFFFFF] text-lg font-[\'Montserrat\'] font-semibold mb-2">No pudimos enviar la solicitud</h4><p class="text-sm text-[#B0B0B0] font-light mb-4">Verifica tu conexión e inténtalo nuevamente. También puedes comunicarte directamente por WhatsApp o llamar al (787) 556-4310.</p><div class="flex flex-col sm:flex-row gap-3 justify-center"><button type="submit" form="home-quote-form" class="inline-flex items-center justify-center px-4 py-3 border border-[#2A2E34] bg-transparent text-[#FFFFFF] font-medium text-sm rounded hover:border-[#FFFFFF] transition-colors focus:outline-none min-h-[48px]">Intentar Nuevamente</button><a href="https://wa.me/17875564310?text=Hola%20AGM%20Custom%20Paint%E2%80%99s%2C%20estoy%20intentando%20solicitar%20una%20cotizaci%C3%B3n%20desde%20su%20p%C3%A1gina%20web." target="_blank" class="inline-flex items-center justify-center px-4 py-3 bg-[#25D366] text-[#FFFFFF] font-medium text-sm rounded hover:bg-[#1EAE53] transition-colors focus:outline-none min-h-[48px]"><iconify-icon icon="solar:phone-calling-linear" class="mr-2 text-xl"></iconify-icon> Escribir por WhatsApp</a></div></div>';
+            statusContainer.focus();
+            if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+              statusContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Enviar Solicitud';
+            form.setAttribute('aria-busy', 'false');
+          }
+        });
+      });
+    </script>
+  
+</body></html>
